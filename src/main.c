@@ -10,7 +10,7 @@ int main(){
 	RecordMetaData* metadata=malloc(sizeof(RecordMetaData));
 	unsigned long arr[]={4,4,8,4};
 	char keys[]={0};
-	char sort[]={1};
+	char sort[]={2};
 	DataTypes types[]={INT,FLOAT,LONG,STRING};
 	const char *names[]={"int","float","long","string"};
 	RecordMetaData_new(metadata, arr,4, keys, 1,sort,1,types,names);
@@ -29,7 +29,7 @@ int main(){
 
 	Node* n2=Node_new_heap(stride);
 	Record* r2=Node_getRecord(n2);
-	Record_setInt(metadata, r2,0,800);
+	Record_setInt(metadata, r2,0,600);
 
 	Tree_Insert_Node(&tree,n1);
 	Tree_Insert_Node(&tree,n2);

@@ -34,7 +34,6 @@ typedef struct RecordMetaData{
 
 
 typedef struct Record{
-	const void* data;
 } Record;
 
 int Record_CompareTo(Record* r1,Record* r2);

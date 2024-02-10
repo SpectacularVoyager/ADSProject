@@ -17,6 +17,7 @@ Node* Node_new_heap(int data);
 Node* Node_Insert(Node* root,Node* n,RecordMetaData* metadata);
 void Node_Print(Node* t,RecordMetaData* metadata);
 Record* Node_getRecord(Node* node);
+int Node_Equal(Node* n1,Node* n2,RecordMetaData* metadata);
 
 typedef struct Tree{
 	Node* root;	
