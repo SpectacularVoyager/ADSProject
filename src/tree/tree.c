@@ -1,48 +1,57 @@
 #include "../include/tree.h"
 
 
-void printBlob(const void* addr,unsigned long len){
-	const void * final=addr+len;
-	while(addr!=final){
-		printf("%hhx ",*((char*)addr++));
-	}
-	printf("\n");
-}
 
 
 
 void Tree_Insert_Node(Tree* tree,Node* n){
-	tree->root=Node_Insert(tree->root,n);
+	tree->root=Node_Insert(tree->root,n,tree->metadata);
+}
+void Tree_new(Tree* t,RecordMetaData* metadata){
+	t->root=0;
+	t->metadata=metadata;
+}
+void Tree_Print(Tree* t){
+	if(!t->root){return;}
+	Node_Print(t->root,t->metadata);
 }
 
-Node* Node_Insert(Node* root,Node* n){
+
+
+
+
+
+
+
+
+
+
+Node* Node_Insert(Node* root,Node* n,RecordMetaData* metadata){
 	if(!root){
 		root=n;
 	}else{
-		int x=Node_CompareTo(root,n);
+		int x=Node_CompareTo(root,n,metadata);
 		if(x==0){
 		}else if(x>0){
-			root->left=Node_Insert(root->left,n);
+			root->left=Node_Insert(root->left,n,metadata);
 		}else{
-			root->right=Node_Insert(root->right,n);
+			root->right=Node_Insert(root->right,n,metadata);
 		}
 	}
 	return root;
 }
-int Node_CompareTo(Node* n1,Node* n2){
+int Node_CompareTo(Node* n1,Node* n2,RecordMetaData* metadata){
 	//return compareInt(n1->a,n2->a);
-	return -1;
-}
+	DataTypes type=metadata->types[0];
+	Record *r1=Node_getRecord(n1);
+	Record *r2=Node_getRecord(n2);
+	for(int i=0;i<metadata->sort_n;i++){
 
-//int compareInt (int a, int b)
-//{
-//    if (a < b) return -1;
-//    if (a > b) return 1;
-//    return 0;
-//}
-
-void Tree_new(Tree* t){
-	t->root=0;
+		int sortCol=metadata->sort[i];
+		int x= Datatype_Compare(type, Record_get(metadata, r1,sortCol), Record_get(metadata, r2,sortCol),metadata->sizes[sortCol]);
+		if(x!=0){return x;}
+	}
+	return 0;
 }
 
 void Node_new(Node* n){
@@ -62,16 +71,12 @@ Record* Node_getRecord(Node* node){
 	return (Record*)(node+1);
 
 }
-void Node_Print(Node* t){
+
+void Node_Print(Node* t,RecordMetaData* metadata){
 	if(!t)return ;
-	Node_Print(t->left);
-	printf("[node]\n");
-	printBlob(t+1,t->size);
-	Node_Print(t->right);
-}
+	Node_Print(t->left,metadata);
 
-void Tree_Print(Tree* t){
-	if(!t->root){return;}
-	Node_Print((t)->root);
+	Record* r=(Record*)(t+1);
+	Record_print(r,metadata);
+	Node_Print(t->right,metadata);
 }
-
