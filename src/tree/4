@@ -1,0 +1,47 @@
+#include "../include/tree.h"
+
+void Tree_Insert_Node(Tree* tree,Node* n){
+	Node_Insert(tree->root,n);
+}
+
+void Node_Insert(Node** root,Node* n){
+	if(!root){
+		root=&n;
+	}else{
+		int x=Node_CompareTo((*root),n);
+		if(x==0){
+
+		}else if(x>0){
+			Node_Insert((*root)->right,n);
+		}else{
+			Node_Insert((*root)->left,n);
+		}
+	}
+}
+int Node_CompareTo(Node* n1,Node* n2){
+	return (n1->a)>(n2->a);
+}
+
+void Tree_new(Tree* t){
+	t->root=0;
+}
+
+void Node_new(Node* n){
+	n->a=0;
+	n->b=0;
+	n->left=0;
+	n->right=0;
+}
+
+void Node_Print(Node* t){
+	if(!t)return ;
+	Node_Print(*t->left);
+	printf("[%d %d]\n",t->a,t->b);
+	Node_Print(*t->right);
+}
+
+void Tree_Print(Tree* t){
+	if(!t){return ;}
+	printf("%p\n",*t->root);
+	Node_Print(*(t)->root);
+}
