@@ -1,9 +1,6 @@
 #include "../include/tree.h"
-
-
-
-
-
+#include <stdio.h>
+#include <string.h>
 void Tree_Insert_Node(Tree* tree,Node* n){
 	tree->root=Node_Insert(tree->root,n,tree->metadata);
 }
@@ -16,91 +13,36 @@ void Tree_Print(Tree* t){
 	Node_Print(t->root,t->metadata);
 }
 
-
-
-
-
-
-
-
-
-
-
-Node* Node_Insert(Node* root,Node* n,RecordMetaData* metadata){
-	if(!root){
-		root=n;
-		return root;
-	}else{
-		int x=Node_CompareTo(root,n,metadata);
-		int eq=Node_Equal(root,n,metadata);
-		if(eq==0){
-			printf("COLLISION\n");
-			//return root;
-			n->left=root->left;
-			n->right=root->right;
-			return n;
-		}
-		if(x==0){
-			root->right=Node_Insert(root->right,n,metadata);
-		}else if(x>0){
-			root->left=Node_Insert(root->left,n,metadata);
-		}else{
-			root->right=Node_Insert(root->right,n,metadata);
-		}
+unsigned int Tree_Node_size(Tree* t){
+	return t->metadata->stride+sizeof(Node);
+}
+int NodetoDisk(FILE* file,Node* node){
+	if(!node){return 0;}	
+	int ret=0;
+	ret+=NodetoDisk(file,node->left);
+	Node_write(file,node);
+	ret+=NodetoDisk(file,node->right);
+	return ret+1;
+}
+List* getSortedTable(FILE* file,RecordMetaData* metadata){
+	List* l=malloc(sizeof(List));
+	List_init(l,metadata->stride);
+	int x;
+	fread(&x,4,1,file);
+	for(int i=0;i<x;i++){
+		unsigned char data[metadata->stride];
+		int width;
+		fread(&width,4,1,file);
+		fread(data,metadata->stride,1,file);
+		Node* n=Node_new_heap(metadata->stride);
+		memcpy(Node_getRecord(n),data, metadata->stride);
+		List_add(l, n);
 	}
-	return root;
+	return l;
 }
-
-int Node_Equal(Node* n1,Node* n2,RecordMetaData* metadata){
-	//return compareInt(n1->a,n2->a);
-	DataTypes type=metadata->types[0];
-	Record *r1=Node_getRecord(n1);
-	Record *r2=Node_getRecord(n2);
-	for(int i=0;i<metadata->key_n;i++){
-
-		int keyCol=metadata->key[i];
-		int x= Datatype_Compare(type, Record_get(metadata, r1,keyCol), Record_get(metadata, r2,keyCol),metadata->sizes[keyCol]);
-		if(x!=0){return x;}
-	}
-	return 0;
-}
-int Node_CompareTo(Node* n1,Node* n2,RecordMetaData* metadata){
-	//return compareInt(n1->a,n2->a);
-	DataTypes type=metadata->types[0];
-	Record *r1=Node_getRecord(n1);
-	Record *r2=Node_getRecord(n2);
-	for(int i=0;i<metadata->sort_n;i++){
-
-		int sortCol=metadata->sort[i];
-		int x= Datatype_Compare(type, Record_get(metadata, r1,sortCol), Record_get(metadata, r2,sortCol),metadata->sizes[sortCol]);
-		if(x!=0){return x;}
-	}
-	return 0;
-}
-
-void Node_new(Node* n){
-	n->left=0;
-	n->right=0;
-}
-
-Node* Node_new_heap(int data){
-	//printf("size:%d",sizeof(Node));
-	Node* n= malloc(data+sizeof(Node));
-	n->left=0;
-	n->right=0;
-	n->size=data;
-	return n;
-}
-Record* Node_getRecord(Node* node){
-	return (Record*)(node+1);
-
-}
-
-void Node_Print(Node* t,RecordMetaData* metadata){
-	if(!t)return ;
-	Node_Print(t->left,metadata);
-
-	Record* r=(Record*)(t+1);
-	Record_print(r,metadata);
-	Node_Print(t->right,metadata);
+void TreetoDisk(FILE* file,Tree* tree){
+	fseek(file,4,SEEK_SET);
+	int x=NodetoDisk(file,tree->root);
+	fseek(file,0,SEEK_SET);
+	fwrite(&x,4,1,file);
 }

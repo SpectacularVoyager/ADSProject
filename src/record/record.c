@@ -88,7 +88,6 @@ void RecordMetaData_new(RecordMetaData* rmd,unsigned long sizes[],int n,char key
 	}
 	rmd->stride=sum;
 }
-
 void RecordMetaData_Print(RecordMetaData* rmd){
 
 	printf("-------------------------------------------\n");
@@ -122,8 +121,10 @@ void RecordMetaData_Print(RecordMetaData* rmd){
 	for(int i=0;i<rmd->n;i++){
 		printf("%s,",rmd->columns[i]);
 	}
+
 	printf("\n");
 
 	printf("\nSIZE:%d\n",rmd->stride);
+	printf("-------------------------------------------\n");
 	printf("-------------------------------------------\n");
 }
